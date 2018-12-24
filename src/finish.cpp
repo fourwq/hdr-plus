@@ -131,19 +131,41 @@ Func demosaic(Func input, int width, int height) {
 
     output(x, y, c) = input(x, y);                                              // initialize each channel to input mosaicked image
 
-    // red
-    output(r1.x * 2 + 1, r1.y * 2,     0) = d1(r1.x * 2 + 1, r1.y * 2);         // R at green in R row, B column
-    output(r1.x * 2,     r1.y * 2 + 1, 0) = d2(r1.x * 2,     r1.y * 2 + 1);     // R at green in B row, R column
-    output(r1.x * 2 + 1, r1.y * 2 + 1, 0) = d3(r1.x * 2 + 1, r1.y * 2 + 1);     // R at blue in B row, B column
+    if(true){
+        // red
+        output(r1.x * 2 + 1, r1.y * 2,     0) = d1(r1.x * 2 + 1, r1.y * 2);         // R at green in R row, B column
+        output(r1.x * 2,     r1.y * 2 + 1, 0) = d2(r1.x * 2,     r1.y * 2 + 1);     // R at green in B row, R column
+        output(r1.x * 2 + 1, r1.y * 2 + 1, 0) = d3(r1.x * 2 + 1, r1.y * 2 + 1);     // R at blue in B row, B column
 
-    // green
-    output(r1.x * 2,     r1.y * 2,     1) = d0(r1.x * 2,     r1.y * 2);         // G at R locations
-    output(r1.x * 2 + 1, r1.y * 2 + 1, 1) = d0(r1.x * 2 + 1, r1.y * 2 + 1);     // G at B locations
+        // green
+        output(r1.x * 2,     r1.y * 2,     1) = d0(r1.x * 2,     r1.y * 2);         // G at R locations
+        output(r1.x * 2 + 1, r1.y * 2 + 1, 1) = d0(r1.x * 2 + 1, r1.y * 2 + 1);     // G at B locations
 
-    // blue
-    output(r1.x * 2,     r1.y * 2 + 1, 2) = d1(r1.x * 2,     r1.y * 2 + 1);     // B at green in B row, R column
-    output(r1.x * 2 + 1, r1.y * 2,     2) = d2(r1.x * 2 + 1, r1.y * 2);         // B at green in R row, B column
-    output(r1.x * 2,     r1.y * 2,     2) = d3(r1.x * 2,     r1.y * 2);         // B at red in R row, R column
+        // blue
+        output(r1.x * 2,     r1.y * 2 + 1, 2) = d1(r1.x * 2,     r1.y * 2 + 1);     // B at green in B row, R column
+        output(r1.x * 2 + 1, r1.y * 2,     2) = d2(r1.x * 2 + 1, r1.y * 2);         // B at green in R row, B column
+        output(r1.x * 2,     r1.y * 2,     2) = d3(r1.x * 2,     r1.y * 2);         // B at red in R row, R column
+
+     }else{
+
+        // red
+        output(r1.x * 2 + 1, r1.y * 2,     0) = d2(r1.x * 2 + 1, r1.y * 2);         // R at green in R row, B column
+        output(r1.x * 2,     r1.y * 2 + 1, 0) = d1(r1.x * 2,     r1.y * 2 + 1);     // R at green in B row, R column
+        output(r1.x * 2    , r1.y * 2 ,    0) = d3(r1.x * 2    , r1.y * 2 );     // R at blue in B row, B column
+
+        // green
+        output(r1.x * 2,     r1.y * 2,     1) = d0(r1.x * 2,     r1.y * 2);         // G at R locations
+        output(r1.x * 2 + 1, r1.y * 2 + 1, 1) = d0(r1.x * 2 + 1, r1.y * 2 + 1);     // G at B locations
+
+        // blue
+        output(r1.x * 2,     r1.y * 2 + 1, 2) = d2(r1.x * 2,     r1.y * 2 + 1);     // B at green in B row, R column
+        output(r1.x * 2 + 1, r1.y * 2,     2) = d1(r1.x * 2 + 1, r1.y * 2);         // B at green in R row, B column
+        output(r1.x * 2+1,   r1.y * 2+1,   2) = d3(r1.x * 2+1,     r1.y * 2+1);         // B at red in R row, R column
+
+
+    }
+
+
 
     ///////////////////////////////////////////////////////////////////////////
     // schedule

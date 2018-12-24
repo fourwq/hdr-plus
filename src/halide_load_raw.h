@@ -47,7 +47,9 @@ template<Internal::CheckFunc check = Internal::CheckFail>
 bool load_raw(const std::string &filename, uint16_t* data, int width, int height) {
 
     Internal::PipeOpener f(("../tools/dcraw -c -D -6 -W -g 1 1 " + filename).c_str(), "r");
-    if (!check(f.f != nullptr, "File %s could not be opened for reading\n", filename.c_str())) return false;
+    if (!check(f.f != nullptr, "error info 3"/*"File %s could not be opened for reading\n", filename.c_str()*/)) {
+        return false;
+    }
 
     int in_width, in_height, maxval;
     char header[256];
@@ -55,17 +57,37 @@ bool load_raw(const std::string &filename, uint16_t* data, int width, int height
     bool fmt_binary = false;
 
     f.readLine(buf, 1024);
+
+
     if (!check(sscanf(buf, "%255s", header) == 1, "Could not read PGM header\n")) return false;
+
+
     if (header == std::string("P5") || header == std::string("p5"))
         fmt_binary = true;
+
     if (!check(fmt_binary, "Input is not binary PGM\n")) return false;
 
     f.readLine(buf, 1024);
     if (!check(sscanf(buf, "%d %d\n", &in_width, &in_height) == 2, "Could not read PGM width and height\n")) return false;
 
-    if (!check(in_width == width, "Input image '%s' has width %d, but must must have width of %d\n", filename.c_str(), in_width, width)) return false;
+    //print size info
+    std::cerr << "width: " << width << std::endl;
+    std::cerr << "height: " << height << std::endl;
+    std::cerr << "in_width: " << in_width << std::endl;
+    std::cerr << "in_height: " << in_height << std::endl;
 
-    if (!check(in_height == height, "Input image '%s' has height %d, but must must have height of %d\n", filename.c_str(), in_height, height)) return false;
+
+
+
+    if (!check(in_width == width, "error info 1")) {
+       printf("Input image '%s' has width %d, but must must have width of %d\n", filename.c_str(), in_width, width );
+       return false;
+    }
+
+    if (!check(in_height == height, "error info 2")) {
+        printf("Input image '%s' has height %d, but must must have height of %d\n", filename.c_str(), in_height, height);
+        return false;
+    }
 
     f.readLine(buf, 1024);
     if (!check(sscanf(buf, "%d", &maxval) == 1, "Could not read PGM max value\n")) return false;

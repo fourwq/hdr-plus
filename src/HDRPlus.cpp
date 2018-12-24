@@ -18,14 +18,17 @@ class HDRPlus {
 
     private:
 
-        const Image<uint16_t> imgs;
+        const Buffer<uint16_t> imgs;
 
     public:
 
         // dimensions of pixel phone output images are 3036 x 4048
 
-        static const int width = 5796;
-        static const int height = 3870;
+        // static const int width = 5796;
+        // static const int height = 3870;
+        static const int width = 4032;
+        static const int height = 3024;
+       
 
         const BlackPoint bp;
         const WhitePoint wp;
@@ -33,7 +36,7 @@ class HDRPlus {
         const Compression c;
         const Gain g;
 
-        HDRPlus(Image<uint16_t> imgs, BlackPoint bp, WhitePoint wp, WhiteBalance wb, Compression c, Gain g) : imgs(imgs), bp(bp), wp(wp), wb(wb), c(c), g(g) {
+        HDRPlus(Buffer<uint16_t> imgs, BlackPoint bp, WhitePoint wp, WhiteBalance wb, Compression c, Gain g) : imgs(imgs), bp(bp), wp(wp), wb(wb), c(c), g(g) {
 
             assert(imgs.dimensions() == 3);         // width * height * img_idx
             assert(imgs.width() == width);
@@ -44,7 +47,7 @@ class HDRPlus {
         /*
          * process -- Calls all of the main stages (align, merge, finish) of the pipeline.
          */
-        Image<uint8_t> process() {
+        Buffer<uint8_t> process() {
 
             Func alignment = align(imgs);
             Func merged = merge(imgs, alignment);
@@ -54,7 +57,7 @@ class HDRPlus {
             // realize image
             ///////////////////////////////////////////////////////////////////////////
 
-            Image<uint8_t> output_img(3, width, height);
+            Buffer<uint8_t> output_img(3, width, height);
 
             finished.realize(output_img);
 
@@ -67,13 +70,13 @@ class HDRPlus {
         }
 
         /*
-         * load_raws -- Loads CR2 (Canon Raw) files into a Halide Image.
+         * load_raws -- Loads CR2 (Canon Raw) files into a Halide Buffer.
          */
-        static bool load_raws(std::string dir_path, std::vector<std::string> &img_names, Image<uint16_t> &imgs) {
+        static bool load_raws(std::string dir_path, std::vector<std::string> &img_names, Buffer<uint16_t> &imgs) {
 
             int num_imgs = img_names.size();
 
-            imgs = Image<uint16_t>(width, height, num_imgs);
+            imgs = Buffer<uint16_t>(width, height, num_imgs);
 
             uint16_t *data = imgs.data();
 
@@ -96,7 +99,7 @@ class HDRPlus {
         /*
          * save_png -- Writes an interleaved Halide image to an output file.
          */
-        static bool save_png(std::string dir_path, std::string img_name, Image<uint8_t> &img) {
+        static bool save_png(std::string dir_path, std::string img_name, Buffer<uint8_t> &img) {
 
             std::string img_path = dir_path + "/" + img_name;
 
@@ -130,6 +133,8 @@ const WhiteBalance read_white_balance(std::string file_path) {
         float r, g0, g1, b;
 
         if(sscanf(buf, "Camera multipliers: %f %f %f %f", &r, &g0, &b, &g1) == 4) {
+
+            if (g1 == 0) g1 = g0; // add by weiqiang
 
             float m = std::min(std::min(r, g0), std::min(g1, b));
 
@@ -184,17 +189,19 @@ int main(int argc, char* argv[]) {
 
     while (i < argc) in_names.push_back(argv[i++]);
 
-    Image<uint16_t> imgs;
+    Buffer<uint16_t> imgs;
 
     if(!HDRPlus::load_raws(dir_path, in_names, imgs)) return -1;
 
     const WhiteBalance wb = read_white_balance(dir_path + "/" + in_names[0]);
-    const BlackPoint bp = 2050;
-    const WhitePoint wp = 15464;
+    // const BlackPoint bp = 2050;
+    // const WhitePoint wp = 15464;
+    const BlackPoint bp = 63;
+    const WhitePoint wp = 1023;
 
     HDRPlus hdr_plus = HDRPlus(imgs, bp, wp, wb, c, g);
 
-    Image<uint8_t> output = hdr_plus.process();
+    Buffer<uint8_t> output = hdr_plus.process();
     
     if(!HDRPlus::save_png(dir_path, out_name, output)) return -1;
 
